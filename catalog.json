@@ -1,0 +1,7 @@
+{
+    "catalog": [
+        { "id":0, "song_title":"Song 1", "artist":"Artist 1", "album_title":"Album 1", "duration":240 },
+        { "id":1, "song_title":"Song 2", "artist":"Artist 1", "album_title":"Album 1", "duration":210 },
+        { "id":2, "song_title":"Song 3", "artist":"Artist 2", "album_title":"Album 2", "duration":420 }
+    ]
+}
