@@ -13,11 +13,12 @@ def load_catalog():
         catalog = json.load(file)
     return catalog
 
+
 # Define the server-side playlist and mode
 playlist = []
-mode = "design"  # initial mode
-submode = "default"
+previously_played = []  # Stack to track previously dequeued songs
 now_playing = None
+submode = "default"  # default, shuffle, loop
 
 
 # Response for FETCH_CATALOG
@@ -99,10 +100,13 @@ def switch_to_play_mode(mode):
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     })
 
+
 # Handle play mode commands
 def play_next():
-    global now_playing
+    global now_playing, previously_played
     if len(playlist) > 0:
+        if now_playing:
+            previously_played.append(now_playing)
         now_playing = playlist.pop(0)
         if submode == "loop":
             playlist.append(now_playing)
@@ -116,6 +120,34 @@ def play_next():
         "message": "No more songs in the playlist",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     })
+
+
+# Go back to the previous song
+def go_back():
+    global now_playing
+    if previously_played:
+        # Restore the last played song from the previously_played stack
+        previous_song = previously_played.pop()
+
+        # Place the current song back at the front of the playlist (if not already None)
+        if now_playing:
+            playlist.insert(0, now_playing)
+
+        # Update now_playing to the restored song
+        now_playing = previous_song
+
+        return json.dumps({
+            "status": "success",
+            "message": f"Restored previous song: {now_playing['song_title']}",
+            "now_playing": now_playing,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        })
+    else:
+        return json.dumps({
+            "status": "error",
+            "message": "No previously played song to go back to",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        })
 
 
 # Main server
@@ -144,6 +176,8 @@ def run_server():
             response = switch_to_play_mode(request_data["submode"])
         elif request_data["type"] == "PLAY_NEXT":
             response = play_next()
+        elif request_data["type"] == "GO_BACK":
+            response = go_back()
         else:
             response = json.dumps({
                 "status": "error",

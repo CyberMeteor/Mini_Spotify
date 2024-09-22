@@ -69,6 +69,15 @@ def create_play_next_request():
     return json.dumps(request)
 
 
+# Go back to the previous song in the previously_played stack
+def create_go_back_request():
+    request = {
+        "type": "GO_BACK",
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    }
+    return json.dumps(request)
+
+
 # Use QUIT to terminate the client process
 def create_quit_request():
     request = {

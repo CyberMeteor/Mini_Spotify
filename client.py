@@ -89,6 +89,10 @@ def run_client():
                 response_data = send_request(request.create_play_next_request())
                 response.process_response(response_data)
 
+            elif choice == '2':
+                response_data = send_request(request.create_go_back_request())
+                response.process_response(response_data)
+
             elif choice == '3':
                 print("Switching to design mode...")
                 mode = "design"  # Switch back to design mode
