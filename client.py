@@ -45,8 +45,9 @@ def run_client():
         elif mode == "play":
             print("1. Play Next Song")
             print("2. Go Back")
-            print("3. Switch to Design Mode")
-            print("4. Quit")
+            print("3. Report Now Playing")
+            print("4. Switch to Design Mode")
+            print("5. Quit")
 
         choice = input("Enter your choice: ")
 
@@ -94,10 +95,14 @@ def run_client():
                 response.process_response(response_data)
 
             elif choice == '3':
+                response_data = send_request(request.create_report_now_playing_request())
+                response.process_response(response_data)
+
+            elif choice == '4':
                 print("Switching to design mode...")
                 mode = "design"  # Switch back to design mode
 
-            elif choice == '4':
+            elif choice == '5':
                 print("Exiting...")
                 break
 

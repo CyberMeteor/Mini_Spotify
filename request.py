@@ -51,10 +51,10 @@ def create_find_song_request(song_id):
 
 
 # Switch 3 play modes
-def create_switch_mode_request(mode):
+def create_switch_mode_request(submode):
     request = {
-        "type": "SWITCH_MODE",
-        "mode": mode,  # e.g., "default", "shuffle", "loop"
+        "type": "SWITCH_TO_PLAY",
+        "submode": submode,  # e.g., "default", "shuffle", "loop"
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     }
     return json.dumps(request)
@@ -73,6 +73,15 @@ def create_play_next_request():
 def create_go_back_request():
     request = {
         "type": "GO_BACK",
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    }
+    return json.dumps(request)
+
+
+# Request the now playing song
+def create_report_now_playing_request():
+    request = {
+        "type": "REPORT_NOW_PLAYING",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     }
     return json.dumps(request)

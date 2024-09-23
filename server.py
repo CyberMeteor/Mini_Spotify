@@ -14,8 +14,8 @@ def load_catalog():
     return catalog
 
 
-# Define the server-side playlist and mode
 playlist = []
+play_mode_playlist = []  # Copy of the playlist for play mode
 previously_played = []  # Stack to track previously dequeued songs
 now_playing = None
 submode = "default"  # default, shuffle, loop
@@ -85,13 +85,19 @@ def remove_song(song_id):
 
 # Switch to play mode
 def switch_to_play_mode(mode):
-    global submode, now_playing
+    global play_mode_playlist, submode, now_playing
+    play_mode_playlist = playlist.copy()
     submode = mode
 
-    if len(playlist) > 0:
-        if submode == "shuffle":
-            random.shuffle(playlist)
-        now_playing = playlist[0]
+    if submode == "shuffle":
+        random.shuffle(play_mode_playlist)
+
+    if len(play_mode_playlist) > 0:
+        now_playing = play_mode_playlist.pop(0)
+        if submode == "loop":
+            play_mode_playlist.append(now_playing)
+    else:
+        now_playing = None
 
     return json.dumps({
         "status": "success",
@@ -104,12 +110,12 @@ def switch_to_play_mode(mode):
 # Handle play mode commands
 def play_next():
     global now_playing, previously_played
-    if len(playlist) > 0:
+    if len(play_mode_playlist) > 0:
         if now_playing:
             previously_played.append(now_playing)
-        now_playing = playlist.pop(0)
+        now_playing = play_mode_playlist.pop(0)
         if submode == "loop":
-            playlist.append(now_playing)
+            play_mode_playlist.append(now_playing)
         return json.dumps({
             "status": "success",
             "now_playing": now_playing,
@@ -150,6 +156,22 @@ def go_back():
         })
 
 
+# Report the current song playing
+def report_now_playing():
+    if now_playing:
+        return json.dumps({
+            "status": "success",
+            "now_playing": now_playing,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        })
+    else:
+        return json.dumps({
+            "status": "error",
+            "message": "No song is currently playing",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        })
+
+
 # Main server
 def run_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -160,33 +182,57 @@ def run_server():
     while True:
         connection_socket, addr = server_socket.accept()
         print(f"Connected to {addr}")
-        request = connection_socket.recv(1024).decode('utf-8')
-        request_data = json.loads(request)
 
-        response = {}
-        if request_data["type"] == "FETCH_CATALOG":
-            response = fetch_catalog_response()
-        elif request_data["type"] == "ADD_SONG":
-            response = add_song(request_data["song_id"])
-        elif request_data["type"] == "REMOVE_SONG":
-            response = remove_song(request_data["song_id"])
-        elif request_data["type"] == "REPORT_PLAYLIST":
-            response = report_playlist()
-        elif request_data["type"] == "SWITCH_TO_PLAY":
-            response = switch_to_play_mode(request_data["submode"])
-        elif request_data["type"] == "PLAY_NEXT":
-            response = play_next()
-        elif request_data["type"] == "GO_BACK":
-            response = go_back()
-        else:
-            response = json.dumps({
+        try:
+            request = connection_socket.recv(1024).decode('utf-8')
+            request_data = json.loads(request)
+
+            response = {}
+            if request_data["type"] == "FETCH_CATALOG":
+                response = fetch_catalog_response()
+            elif request_data["type"] == "ADD_SONG":
+                response = add_song(request_data["song_id"])
+            elif request_data["type"] == "REMOVE_SONG":
+                response = remove_song(request_data["song_id"])
+            elif request_data["type"] == "REPORT_PLAYLIST":
+                response = report_playlist()
+            elif request_data["type"] == "SWITCH_TO_PLAY":
+                response = switch_to_play_mode(request_data["submode"])
+            elif request_data["type"] == "PLAY_NEXT":
+                response = play_next()
+            elif request_data["type"] == "GO_BACK":
+                response = go_back()
+            elif request_data["type"] == "REPORT_NOW_PLAYING":
+                response = report_now_playing()
+            else:
+                response = json.dumps({
+                    "status": "error",
+                    "message": "Invalid request type",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+                })
+
+            connection_socket.send(response.encode('utf-8'))
+
+        except json.JSONDecodeError:
+            # Handle JSON decode errors
+            error_response = json.dumps({
                 "status": "error",
-                "message": "Invalid request",
+                "message": "Invalid request format",
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
             })
+            connection_socket.send(error_response.encode('utf-8'))
 
-        connection_socket.send(response.encode('utf-8'))
-        connection_socket.close()
+        except Exception as e:
+            # Handle any other server errors
+            error_response = json.dumps({
+                "status": "error",
+                "message": f"Server error: {str(e)}",
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+            })
+            connection_socket.send(error_response.encode('utf-8'))
+
+        finally:
+            connection_socket.close()
 
 
 if __name__ == "__main__":
