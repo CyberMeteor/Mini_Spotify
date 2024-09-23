@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+"""
+@Project ：Mini_Spotify
+@File    ：request.py
+@Author  ：Ruiyang Chen
+"""
+
 import json
 import time
 

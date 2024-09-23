@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+"""
+@Project ：Mini_Spotify
+@File    ：client.py
+@Author  ：Ruiyang Chen
+"""
+
 import socket
 import json
 import request
