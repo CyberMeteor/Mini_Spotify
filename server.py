@@ -206,11 +206,23 @@ def run_server():
 
     while True:
         connection_socket, addr = server_socket.accept()
+        client_ip = addr[0]
+        server_ip = socket.gethostbyname(socket.gethostname())
         print(f"Connected to {addr}")
 
         try:
             request = connection_socket.recv(1024).decode('utf-8')
             request_data = json.loads(request)
+
+            # Metadata including request line and headers
+            method = request_data.get("method", "GET")
+            url = request_data.get("url", "/")  # Default: root path
+            http_version = "HTTP/1.1"
+            timestamp = request_data.get("timestamp", "No timestamp provided")
+
+            # Print the request line and headers (metadata)
+            print(f"\nRequest Line: {method} {url} {http_version}")
+            print(f"Header Lines: Timestamp: {timestamp}, Client IP: {client_ip}, Server IP: {server_ip}\n")
 
             response = {}
             if request_data["type"] == "FETCH_CATALOG":
