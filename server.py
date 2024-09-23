@@ -32,22 +32,6 @@ def fetch_catalog_response():
     return json.dumps(response)
 
 
-# Report playlist in design mode
-def report_playlist():
-    if len(playlist) > 0:
-        return json.dumps({
-            "status": "success",
-            "playlist": playlist,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-        })
-    else:
-        return json.dumps({
-            "status": "error",
-            "message": "The playlist is empty",
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-        })
-
-
 # Add a song to the playlist
 def add_song(song_id):
     catalog = load_catalog()
@@ -79,6 +63,39 @@ def remove_song(song_id):
     return json.dumps({
         "status": "error",
         "message": f"Song with ID {song_id} not found in playlist",
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    })
+
+
+# Report playlist in design mode
+def report_playlist():
+    if len(playlist) > 0:
+        return json.dumps({
+            "status": "success",
+            "playlist": playlist,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        })
+    else:
+        return json.dumps({
+            "status": "error",
+            "message": "The playlist is empty",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        })
+
+
+# Find a song by its ID in the playlist
+def find_song_by_id(song_id):
+    for song in playlist:
+        if song['id'] == song_id:
+            return json.dumps({
+                "status": "success",
+                "message": f"Song with ID {song_id} found in the playlist.",
+                "song": song,
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+            })
+    return json.dumps({
+        "status": "error",
+        "message": f"Song with ID {song_id} not found in the playlist.",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     })
 
@@ -196,6 +213,8 @@ def run_server():
                 response = remove_song(request_data["song_id"])
             elif request_data["type"] == "REPORT_PLAYLIST":
                 response = report_playlist()
+            elif request_data["type"] == "FIND_SONG":
+                response = find_song_by_id(request_data["song_id"])
             elif request_data["type"] == "SWITCH_TO_PLAY":
                 response = switch_to_play_mode(request_data["submode"])
             elif request_data["type"] == "PLAY_NEXT":
