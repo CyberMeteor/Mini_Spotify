@@ -12,7 +12,6 @@ import json
 # Parse the server's response
 def parse_response(response):
     try:
-        # Convert the JSON string to a Python dictionary
         response_data = json.loads(response)
         return response_data
     except json.JSONDecodeError:

@@ -40,13 +40,13 @@ def create_remove_song_request(song_id):
     return json.dumps(request)
 
 
-# Report the list of songs in the playlist in the order they appear in the playlist
+# Report the list of songs in the playlist
 def create_report_playlist_request():
     request = create_request_metadata("REPORT_PLAYLIST", url="/playlist", method="GET")
     return json.dumps(request)
 
 
-# Find a song by ID from the currently opened playlist
+# Find a song by ID from the current playlist
 def create_find_song_request(song_id):
     request = create_request_metadata("FIND_SONG", url=f"/playlist/{song_id}", method="GET")
     request["song_id"] = song_id
@@ -78,7 +78,7 @@ def create_report_now_playing_request():
     return json.dumps(request)
 
 
-# Use QUIT to terminate the client process
+# Terminate the client process
 def create_quit_request():
     request = create_request_metadata("QUIT", url="/quit", method="POST")
     return json.dumps(request)

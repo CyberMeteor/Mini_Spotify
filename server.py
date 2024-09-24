@@ -23,7 +23,7 @@ def load_catalog():
 
 
 playlist = []
-play_mode_playlist = []  # Copy of the playlist for play mode
+play_mode_playlist = []  # Copy of the playlist
 previously_played = []  # Stack to track previously dequeued songs
 now_playing = None
 submode = "default"  # default, shuffle, loop
@@ -140,7 +140,8 @@ def play_next():
             previously_played.append(now_playing)
         now_playing = play_mode_playlist.pop(0)
         if submode == "loop":
-            play_mode_playlist.append(now_playing)
+            if now_playing not in play_mode_playlist:
+                play_mode_playlist.append(now_playing)
         return json.dumps({
             "status": "success",
             "now_playing": now_playing,
@@ -155,16 +156,11 @@ def play_next():
 
 # Go back to the previous song
 def go_back():
-    global now_playing
+    global now_playing, previously_played
     if previously_played:
-        # Restore the last played song from the previously_played stack
         previous_song = previously_played.pop()
-
-        # Place the current song back at the front of the playlist (if not already None)
         if now_playing:
-            playlist.insert(0, now_playing)
-
-        # Update now_playing to the restored song
+            play_mode_playlist.insert(0, now_playing)
         now_playing = previous_song
 
         return json.dumps({
