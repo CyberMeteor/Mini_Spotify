@@ -10,6 +10,7 @@ import socket
 import json
 import time
 import random
+from utils.tools import log_request, log_response
 
 HOST = 'localhost'
 PORT = 12000
@@ -202,13 +203,17 @@ def run_server():
 
     while True:
         connection_socket, addr = server_socket.accept()
-        client_ip = addr[0]
-        server_ip = socket.gethostbyname(socket.gethostname())
+        client_ip, client_port = addr
+        host_ip = socket.gethostbyname(socket.gethostname())
+        host_port = server_socket.getsockname()[1]
+
         print(f"Connected to {addr}")
 
         try:
             request = connection_socket.recv(1024).decode('utf-8')
             request_data = json.loads(request)
+
+            log_request(request_data, HOST, host_port, client_ip, client_port)
 
             # Metadata including request line and headers
             method = request_data.get("method", "GET")
@@ -218,7 +223,7 @@ def run_server():
 
             # Print the request line and headers (metadata)
             print(f"\nRequest Line: {method} {url} {http_version}")
-            print(f"Header Lines: Timestamp: {timestamp}, Client IP: {client_ip}, Server IP: {server_ip}\n")
+            print(f"Header Lines: Timestamp: {timestamp}, Client IP: {client_ip}, Server IP: {host_ip}\n")
 
             response = {}
             if request_data["type"] == "FETCH_CATALOG":
@@ -246,6 +251,9 @@ def run_server():
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
                 })
 
+            status = "200 OK" if "status" in response and json.loads(response)["status"] == "success" else "400 Bad Request"
+            log_response(response, status, client_ip, client_port)
+
             connection_socket.send(response.encode('utf-8'))
 
         except json.JSONDecodeError:
@@ -255,6 +263,10 @@ def run_server():
                 "message": "Invalid request format",
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
             })
+
+            status = "400 Bad Request"
+            log_response(error_response, status, client_ip, client_port)
+
             connection_socket.send(error_response.encode('utf-8'))
 
         except Exception as e:
@@ -264,6 +276,10 @@ def run_server():
                 "message": f"Server error: {str(e)}",
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
             })
+
+            status = "500 Internal Server Error"
+            log_response(error_response, status, client_ip, client_port)
+
             connection_socket.send(error_response.encode('utf-8'))
 
         finally:
