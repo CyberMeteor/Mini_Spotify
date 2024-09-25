@@ -19,10 +19,10 @@ def log_request(request_data, host, host_port, client_ip, client_port):
 
         headers = f"Host:  {host}:{host_port}\n"
         headers += f"Client IP: {client_ip}, Client Port: {client_port}\n"
-        headers += f"Timestamp: {request_data.get('timestamp', timestamp)}\n"
 
-        file.write(f"{timestamp} - Request Line: {method} {url} {version}\n")
+        file.write(f"{timestamp} - {method} {url} {version}\n")
         file.write(headers)
+        file.write(f"Request Body: {request_data}\n")
         file.write("\n")
 
 
@@ -32,8 +32,7 @@ def log_response(response_data, status, client_ip, client_port):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         version = "HTTP/1.1"
 
-        file.write(f"{timestamp} - Client IP: {client_ip}, Client Port: {client_port}\n")
-        file.write(f"HTTP Version: {version}\n")
-        file.write(f"Status: {status}\n")
+        file.write(f"{timestamp} - {version} {status}\n")
+        file.write(f"Client IP: {client_ip}, Client Port: {client_port}\n")
         file.write(f"Response Body: {response_data}\n")
         file.write("\n")
