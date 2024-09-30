@@ -8,7 +8,6 @@
 
 import json
 
-
 # Parse the server's response
 def parse_response(response):
     try:
@@ -24,14 +23,12 @@ def parse_response(response):
 # Handle a successful response
 def handle_success_response(response_data):
     if "catalog" in response_data:
-        # Display the song catalog
         print("\n--- Song Catalog ---")
         for song in response_data["catalog"]:
             print(
                 f"ID: {song['id']}, Title: {song['song_title']}, Artist: {song['artist']}, Album: {song['album_title']}, Duration: {song['duration']}s")
 
     elif "playlist" in response_data:
-        # Display the playlist
         print("\n--- Playlist ---")
         if len(response_data["playlist"]) > 0:
             for song in response_data["playlist"]:
@@ -41,7 +38,6 @@ def handle_success_response(response_data):
             print("The playlist is currently empty.")
 
     elif "now_playing" in response_data:
-        # Display the currently playing song
         now_playing = response_data["now_playing"]
         if now_playing:
             print(
@@ -50,13 +46,11 @@ def handle_success_response(response_data):
             print("No song is currently playing.")
 
     elif "song" in response_data:
-        # Display a specific song found in the playlist
         song = response_data["song"]
         print(
             f"\n--- Found Song ---\nID: {song['id']}, Title: {song['song_title']}, Artist: {song['artist']}, Album: {song['album_title']}, Duration: {song['duration']}s")
 
     else:
-        # General success message
         print("Success: Operation completed successfully.")
 
 
@@ -69,7 +63,6 @@ def handle_error_response(response_data):
 def process_response(response):
     response_data = parse_response(response)
 
-    # Check the status of the response
     if response_data["status"] == "success":
         handle_success_response(response_data)
     elif response_data["status"] == "error":

@@ -87,7 +87,7 @@ def run_client():
                 submode = input("Enter submode (default/shuffle/loop): ")
                 response_data = send_request(request.create_switch_mode_request(submode))
                 response.process_response(response_data)
-                mode = "play"  # Switch to play mode
+                mode = "play"
 
             elif choice == '7':
                 print("Exiting...")
@@ -108,7 +108,7 @@ def run_client():
 
             elif choice == '4':
                 print("Switching to design mode...")
-                mode = "design"  # Switch back to design mode
+                mode = "design"
 
             elif choice == '5':
                 print("Exiting...")

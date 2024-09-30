@@ -24,7 +24,7 @@ def load_catalog():
 
 
 playlist = []
-play_mode_playlist = []  # Copy of the playlist
+play_mode_playlist = []
 previously_played = []  # Stack to track previously dequeued songs
 now_playing = None
 submode = "default"  # default, shuffle, loop
@@ -217,11 +217,10 @@ def run_server():
 
             # Metadata including request line and headers
             method = request_data.get("method", "GET")
-            url = request_data.get("url", "/")  # Default: root path
+            url = request_data.get("url", "/")
             http_version = "HTTP/1.1"
             timestamp = request_data.get("timestamp", "No timestamp provided")
 
-            # Print the request line and headers (metadata)
             print(f"\nRequest Line: {method} {url} {http_version}")
             print(f"Header Lines: Timestamp: {timestamp}, Client IP: {client_ip}, Server IP: {host_ip}\n")
 
@@ -257,7 +256,6 @@ def run_server():
             connection_socket.send(response.encode('utf-8'))
 
         except json.JSONDecodeError:
-            # Handle JSON decode errors
             error_response = json.dumps({
                 "status": "error",
                 "message": "Invalid request format",
@@ -270,7 +268,6 @@ def run_server():
             connection_socket.send(error_response.encode('utf-8'))
 
         except Exception as e:
-            # Handle any other server errors
             error_response = json.dumps({
                 "status": "error",
                 "message": f"Server error: {str(e)}",
